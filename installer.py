@@ -8,7 +8,7 @@ from pathlib import Path
 
 # ── 常量定义 ──
 
-BASE_URL = "https://yansd666.com"
+BASE_URL = "https://xiaohumini.site"
 
 PROVIDERS = {
     "api-proxy-gpt": {"label": "GPT", "baseUrl_suffix": "/v1", "api": "openai-completions"},

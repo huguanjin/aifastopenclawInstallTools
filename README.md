@@ -3,7 +3,7 @@
 一个可视化的 Windows 桌面工具，用于一键安装、配置和卸载 [OpenClaw](https://openclaw.ai/)。
 
 ## 视频教程
-👉 [点击观看 Bilibili 视频教程](https://www.bilibili.com/video/BV1RwcXzREwR)
+👉 [点击观看 Bilibili 视频教程](https://www.bilibili.com)
 
 ## 功能特性
 
@@ -95,9 +95,9 @@ openclawInstallTools/
 
 | 支付宝 | 微信 |
 |:---:|:---:|
-| <img src="支付宝捐赠.jpg" width="200"> | <img src="微信捐赠.jpg" width="200"> |
+| <img src="支付宝收款码.jpg" width="200"> | <img src="微信收款码.png" width="200"> |
 
 ## 参考文档
 
-- [OpenClaw 配置教程](https://yansd.apifox.cn/8139289m0)
-- [烟神殿 AI](https://yansd666.com/)
+- [OpenClaw 配置教程](https://app.apifox.com/project/6238219)
+- [小胡MINI AI](https://xiaohumini.site/)
