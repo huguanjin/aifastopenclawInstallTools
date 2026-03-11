@@ -1,6 +1,9 @@
 name: Build & Release Windows EXE
 
 on:
+  push:
+    tags:
+      - "v*"
   workflow_dispatch:
     inputs:
       version:
@@ -18,6 +21,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set version
+        id: version
+        shell: pwsh
+        run: |
+          if ("${{ github.event.inputs.version }}") {
+            $ver = "${{ github.event.inputs.version }}"
+          } else {
+            $ver = "${{ github.ref_name }}".TrimStart("v")
+          }
+          echo "VERSION=$ver" >> $env:GITHUB_OUTPUT
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -37,20 +51,20 @@ jobs:
             main.py
 
       - name: Package ZIP
-        run: Compress-Archive -Path dist/OpenClawInstaller.exe -DestinationPath dist/OpenClawInstaller-v${{ github.event.inputs.version }}.zip
+        run: Compress-Archive -Path dist/OpenClawInstaller.exe -DestinationPath dist/OpenClawInstaller-v${{ steps.version.outputs.VERSION }}.zip
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ github.event.inputs.version }}
-          name: OpenClaw Installer v${{ github.event.inputs.version }}
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          name: OpenClaw Installer v${{ steps.version.outputs.VERSION }}
           body: |
-            ## OpenClaw 安装配置工具 v${{ github.event.inputs.version }}
+            ## OpenClaw 安装配置工具 v${{ steps.version.outputs.VERSION }}
 
             Windows 可执行文件，双击即可运行，无需安装 Python。
 
             ### 使用方法
-            1. 下载 `OpenClawInstaller-v${{ github.event.inputs.version }}.zip`
+            1. 下载 `OpenClawInstaller-v${{ steps.version.outputs.VERSION }}.zip`
             2. 解压到任意目录
             3. 双击 `OpenClawInstaller.exe` 运行
 
@@ -67,6 +81,6 @@ jobs:
             2. 点击 **"仍要运行"**
           files: |
             dist/OpenClawInstaller.exe
-            dist/OpenClawInstaller-v${{ github.event.inputs.version }}.zip
+            dist/OpenClawInstaller-v${{ steps.version.outputs.VERSION }}.zip
           draft: false
           prerelease: false
