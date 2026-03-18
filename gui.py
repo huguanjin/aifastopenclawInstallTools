@@ -250,7 +250,11 @@ class OpenClawApp:
         url_row = ttk.Frame(config_frame)
         url_row.pack(fill=tk.X, pady=(0, 10))
         ttk.Label(url_row, text="API Base URL:").pack(side=tk.LEFT)
-        ttk.Label(url_row, text=installer.BASE_URL, style="Url.TLabel").pack(side=tk.LEFT, padx=(10, 0))
+        self.base_url_var = tk.StringVar(value=installer.read_existing_base_url())
+        base_url_entry = ttk.Entry(url_row, textvariable=self.base_url_var, width=40)
+        base_url_entry.pack(side=tk.LEFT, padx=(10, 5), fill=tk.X, expand=True)
+        ttk.Button(url_row, text="🔄 恢复默认", command=self._reset_base_url,
+                   style="Small.TButton").pack(side=tk.LEFT)
 
         key_grid = ttk.Frame(config_frame)
         key_grid.pack(fill=tk.X)
@@ -454,6 +458,11 @@ class OpenClawApp:
             self._refresh_model_tree()
             self._log("已恢复为默认模型列表")
 
+    def _reset_base_url(self):
+        """恢复默认 Base URL"""
+        self.base_url_var.set(installer.BASE_URL)
+        self._log("已恢复为默认 Base URL")
+
     # ── 内部方法 ──
 
     def _toggle_show(self, entry: ttk.Entry):
@@ -546,8 +555,9 @@ class OpenClawApp:
 
         primary = self._get_selected_primary()
         workspace = self.workspace_var.get().strip() or installer.DEFAULT_WORKSPACE
+        base_url = self.base_url_var.get().strip() or installer.BASE_URL
 
-        ok1, path1 = installer.save_openclaw_config(self.models, primary, workspace)
+        ok1, path1 = installer.save_openclaw_config(self.models, primary, workspace, base_url)
         if ok1:
             self._log(f"✅ 配置文件已保存: {path1}")
         else:

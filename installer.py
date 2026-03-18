@@ -206,10 +206,12 @@ def install_openclaw(callback=None):
         return False, str(e)
 
 
-def generate_openclaw_config(models: list[dict], primary_model: str, workspace: str = "") -> dict:
+def generate_openclaw_config(models: list[dict], primary_model: str, workspace: str = "", base_url: str = "") -> dict:
     """生成 openclaw.json 配置内容"""
     if not workspace:
         workspace = DEFAULT_WORKSPACE
+    if not base_url:
+        base_url = BASE_URL
     # 按 provider 分组模型
     provider_models = {}
     for m in models:
@@ -229,7 +231,7 @@ def generate_openclaw_config(models: list[dict], primary_model: str, workspace: 
         if pkey in provider_models:
             suffix = pinfo["baseUrl_suffix"]
             providers_config[pkey] = {
-                "baseUrl": f"{BASE_URL}{suffix}" if suffix else BASE_URL,
+                "baseUrl": f"{base_url}{suffix}" if suffix else base_url,
                 "api": pinfo["api"],
                 "models": provider_models[pkey],
             }
@@ -319,13 +321,13 @@ def generate_auth_profiles(gpt_key: str, claude_key: str, google_key: str, other
     }
 
 
-def save_openclaw_config(models: list[dict], primary_model: str, workspace: str = "") -> tuple[bool, str]:
+def save_openclaw_config(models: list[dict], primary_model: str, workspace: str = "", base_url: str = "") -> tuple[bool, str]:
     """保存 openclaw.json 配置文件"""
     try:
         config_dir = get_openclaw_dir()
         config_dir.mkdir(parents=True, exist_ok=True)
         config_path = config_dir / "openclaw.json"
-        config = generate_openclaw_config(models, primary_model, workspace)
+        config = generate_openclaw_config(models, primary_model, workspace, base_url)
         with open(config_path, "w", encoding="utf-8") as f:
             json.dump(config, f, indent=2, ensure_ascii=False)
         return True, str(config_path)
@@ -374,7 +376,25 @@ def read_existing_auth_keys() -> tuple[str, str, str, str]:
 
 def read_existing_base_url() -> str:
     """读取已有配置中的 baseUrl"""
-    return BASE_URL
+    config_path = get_openclaw_dir() / "openclaw.json"
+    if not config_path.exists():
+        return BASE_URL
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = json.load(f)
+        providers = config.get("providers", {})
+        # 从任意一个 provider 获取 baseUrl，去掉后缀
+        for pkey, pinfo in providers.items():
+            url = pinfo.get("baseUrl", "")
+            if url:
+                # 去掉已知后缀
+                suffix = PROVIDERS.get(pkey, {}).get("baseUrl_suffix", "")
+                if suffix and url.endswith(suffix):
+                    return url[:-len(suffix)]
+                return url
+        return BASE_URL
+    except Exception:
+        return BASE_URL
 
 
 def read_existing_models() -> list[dict]:
